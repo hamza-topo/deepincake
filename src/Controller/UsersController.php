@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Application;
 use App\Repository\User as UserRepository;
+
 /**
  * Users Controller
  *
- * @property \App\Model\Table\UsersTable $Users
  * @method \App\Model\Entity\User[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
  */
 class UsersController extends AppController
 {
     protected $userRepository;
 
-    public function initialize(): void
-    {
-        parent::initialize();
-        $this->userRepository = new UserRepository;
+    public function __construct($request = null, $response = null) {
+        parent::__construct($request, $response);
+        
+        $this->userRepository = new UserRepository();
     }
+
     /**
      * Index method
      *
@@ -28,6 +28,7 @@ class UsersController extends AppController
      */
     public function index()
     {
+
         $users = $this->paginate($this->userRepository->all());
         $this->set(compact('users'));
     }
@@ -41,7 +42,8 @@ class UsersController extends AppController
      */
     public function view($id = null)
     {
-        $user = $this->userRepository->findById($id,['contain' => []]);
+        /**$user = $this->User->find('first', array('conditions' => array('id' => $id))); old syntax */
+        $user = $this->userRepository->findById($id);
         $this->set(compact('user'));
     }
 
@@ -53,9 +55,11 @@ class UsersController extends AppController
     public function add()
     {
         $user = $this->Users->newEmptyEntity();
-        if ($this->request->is('post')) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
-            if ($this->Users->save($user)) {
+
+        if ($this->getRequest()->is('post')) {
+            $newUser = $this->userRepository->create($user, $this->getRequest()->getData());
+
+            if ($newUser) {
                 $this->Flash->success(__('The user has been saved.'));
 
                 return $this->redirect(['action' => 'index']);
@@ -74,9 +78,8 @@ class UsersController extends AppController
      */
     public function edit($id = null)
     {
-        $user = $this->Users->get($id, [
-            'contain' => [],
-        ]);
+        $user = $this->userRepository->findById($id);
+
         if ($this->request->is(['patch', 'post', 'put'])) {
             $user = $this->Users->patchEntity($user, $this->request->getData());
             if ($this->Users->save($user)) {

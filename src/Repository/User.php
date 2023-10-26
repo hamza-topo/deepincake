@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Model\Entity\User as EntityUser;
 use App\Model\Table\UsersTable;
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\Table;
-use Cake\Datasource\ResultSetInterface;
-use Exception;
+use Cake\Log\Log;
 
 class User implements RepositoryInterface
 {
@@ -19,17 +19,40 @@ class User implements RepositoryInterface
         $this->usersTable = new UsersTable();
     }
 
-    public function all(?Table $table = null, array $options = []): UsersTable
+    /**
+     * all
+     *
+     * @param  mixed $table
+     * @param  mixed $options
+     * @return UsersTable
+     */
+    public function all(?Table $table = null, array $options = []): UsersTable //TODO::use collection
     {
         return $this->usersTable;
     }
 
-    public function create(EntityInterface $entity, array $options = [])
+    /**
+     * create
+     *
+     * @param  mixed $newEmptyEntity
+     * @param  mixed $request
+     * @return EntityUser
+     */
+    public function create(EntityInterface $newEmptyEntity, array $request = []): EntityUser
     {
-        throw new Exception("Method Not Allowed", 405);
+        $user = $this->usersTable->patchEntity($newEmptyEntity, $request);
+        
+        return $this->usersTable->save($user);
     }
 
-    public function findById(string $primaryKey, array $options = [])
+    /**
+     * findById
+     *
+     * @param  mixed $primaryKey
+     * @param  mixed $options
+     * @return EntityUser
+     */
+    public function findById(string $primaryKey, array $options = []): EntityUser
     {
         return $this->usersTable->get($primaryKey, $options);
     }
